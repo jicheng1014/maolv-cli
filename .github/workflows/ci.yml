@@ -1,0 +1,43 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test -race ./...
+      - run: go vet ./...
+      - run: go build ./cmd/maolv
+      - run: python3 scripts/test_install.py
+  windows-installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Parse installer and preserve existing installation
+        shell: pwsh
+        run: |
+          $parseErrors = $null
+          $tokens = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'scripts/install.ps1'), [ref]$tokens, [ref]$parseErrors)
+          if ($parseErrors.Count) { throw ($parseErrors | Out-String) }
+          $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'maolv-install-test'
+          $targetDir = Join-Path $env:LOCALAPPDATA 'Maolv/bin'
+          New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+          $target = Join-Path $targetDir 'maolv.exe'
+          go build -ldflags '-X main.version=v0.1.0' -o $target ./cmd/maolv
+          if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
+          $before = (Get-FileHash $target).Hash
+          $env:MAOLV_VERSION = 'invalid-download-tag'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Existing installation was not preserved' }
+          if ((Get-FileHash $target).Hash -ne $before) { throw 'Existing binary changed' }
