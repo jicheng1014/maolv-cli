@@ -2,6 +2,8 @@
 
 [毛驴短链](https://www.maolvdl.com)的 Go 命令行工具和 AI Skill。支持授权、短链创建、查询、修改和项目查询，使用账号现有的 API Token。
 
+[官网：CLI 与 AI Skill](https://www.maolvdl.com/cli) · [Skill 安装与使用指南](skills/README.md) · [AI 执行规范](skills/maolv/SKILL.md)
+
 ## 安装
 
 无需 Go。支持 macOS、Linux、Windows 的 amd64 / arm64，使用 [GitHub Releases](https://github.com/jicheng1014/maolv-cli/releases) 的预编译程序。
@@ -67,15 +69,13 @@ maolv help
 
 ## AI Skill
 
-将仓库的完整 [`skills/maolv`](skills/maolv) 目录复制到所用 AI 工具的 Skill 目录，例如 Codex 的 `~/.codex/skills/maolv`。必须保留其中的 `scripts`，首次使用可自动安装 CLI；无需预先安装 Go。
-
-也可通过 [Vercel Skills CLI](https://github.com/vercel-labs/skills) 安装（Node.js 要求见该工具说明）：
+在支持本地 Skill 和命令执行的 AI 工具中，通过 [Vercel Skills CLI](https://github.com/vercel-labs/skills) 安装（Node.js 要求见该工具说明）：
 
 ```sh
 npx skills add jicheng1014/maolv-cli --skill maolv
 ```
 
-示例请求：“用毛驴短链给 https://example.com 创建短链接，放到官网项目。” Skill 会使用 CLI 的 JSON 输出；首次授权引导到官网创建 Token，Token 不会写入 Skill。更新 Skill 时替换完整目录，更新 Skill 与更新 CLI 是两个独立操作。
+示例请求：“用毛驴短链给 https://example.com 创建短链接，放到官网项目。” Skill 使用 CLI 的 JSON 输出，首次授权在本机终端完成。完整目录安装、支持的工具路径、更新和使用限制见 [Skill 安装与使用指南](skills/README.md)。
 
 ## 开发和发布
 
